@@ -4,6 +4,7 @@ import { useWallet } from '@solana/wallet-adapter-react'
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui'
 import { useState, useEffect } from 'react'
 import { useConnection, initializeAccount, incrementCounter, decrementCounter, getAccountData } from '@/lib/solana-dev'
+import { createUserWithWallet, getUserByWallet, createCounter, updateCounter, getCounterByUser, createTransaction } from '@/lib/supabase'
 import { ResponsiveContainer, Card, Button } from '@/components/ResponsiveContainer'
 
 const Home = () => {
@@ -18,8 +19,83 @@ const Home = () => {
   useEffect(() => {
     if (connected && program && publicKey) {
       loadAccountData()
+      setupUserInDatabase()
     }
   }, [connected, program, publicKey])
+
+  const setupUserInDatabase = async () => {
+    if (!publicKey) return
+
+    try {
+      const walletAddress = publicKey.toBase58()
+      
+      // Check if user exists
+      const userResult = await getUserByWallet(walletAddress)
+      
+      if (!userResult.success || !userResult.data) {
+        // Create new user
+        console.log('Creating new user in database...')
+        const createResult = await createUserWithWallet(walletAddress)
+        
+        if (createResult.success) {
+          console.log('User created successfully:', createResult.data)
+          
+          // Create counter for new user
+          const counterResult = await createCounter(createResult.data.id, 0)
+          if (counterResult.success) {
+            console.log('Counter created successfully:', counterResult.data)
+          }
+        } else {
+          console.error('Error creating user:', createResult.error)
+        }
+      } else {
+        console.log('User already exists:', userResult.data)
+        
+        // Load existing counter
+        const counterResult = await getCounterByUser(userResult.data.id)
+        if (counterResult.success && counterResult.data) {
+          setCount(counterResult.data.current_count)
+          setIsInitialized(true)
+        }
+      }
+    } catch (error) {
+      console.error('Error setting up user in database:', error)
+    }
+  }
+
+  const saveCounterToDatabase = async (newCount: number, action: 'increment' | 'decrement') => {
+    if (!publicKey) return
+
+    try {
+      const walletAddress = publicKey.toBase58()
+      
+      // Get user
+      const userResult = await getUserByWallet(walletAddress)
+      if (!userResult.success || !userResult.data) {
+        console.error('User not found for counter update')
+        return
+      }
+
+      // Update counter in database
+      const counterResult = await updateCounter(userResult.data.id, newCount)
+      if (counterResult.success) {
+        console.log('Counter updated in database:', counterResult.data)
+      }
+
+      // Record transaction
+      const transactionResult = await createTransaction(
+        userResult.data.id,
+        `mock_signature_${action}_${Date.now()}`,
+        1,
+        action
+      )
+      if (transactionResult.success) {
+        console.log('Transaction recorded:', transactionResult.data)
+      }
+    } catch (error) {
+      console.error('Error saving counter to database:', error)
+    }
+  }
 
   const loadAccountData = async () => {
     if (!program || !publicKey) return
@@ -61,8 +137,12 @@ const Home = () => {
     const result = await incrementCounter(program, publicKey)
     
     if (result.success) {
-      setCount(count + 1)
+      const newCount = count + 1
+      setCount(newCount)
       setMessage('Counter incremented!')
+      
+      // Save to Supabase
+      await saveCounterToDatabase(newCount, 'increment')
     } else {
       setMessage(`Error: ${result.error}`)
     }
@@ -76,8 +156,12 @@ const Home = () => {
     const result = await decrementCounter(program, publicKey)
     
     if (result.success) {
-      setCount(count - 1)
+      const newCount = count - 1
+      setCount(newCount)
       setMessage('Counter decremented!')
+      
+      // Save to Supabase
+      await saveCounterToDatabase(newCount, 'decrement')
     } else {
       setMessage(`Error: ${result.error}`)
     }

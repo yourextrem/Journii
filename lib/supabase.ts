@@ -210,6 +210,27 @@ export const getTransactionsByUser = async (userId: string, limit = 50) => {
 }
 
 // Counter management functions
+export const createCounter = async (userId: string, initialCount: number = 0) => {
+  try {
+    const { data, error } = await supabase
+      .from('counters')
+      .insert([
+        {
+          user_id: userId,
+          current_count: initialCount,
+        }
+      ])
+      .select()
+      .single()
+
+    if (error) throw error
+    return { success: true, data }
+  } catch (error) {
+    console.error('Error creating counter:', error)
+    return { success: false, error: error instanceof Error ? error.message : 'Unknown error' }
+  }
+}
+
 export const updateCounter = async (userId: string, count: number) => {
   try {
     const { data, error } = await supabase
