@@ -37,7 +37,8 @@ export const Button = ({
   variant = 'primary',
   size = 'md',
   className = '',
-  disabled = false 
+  disabled = false,
+  type = 'button'
 }: {
   children: ReactNode
   onClick?: () => void
@@ -45,6 +46,7 @@ export const Button = ({
   size?: 'sm' | 'md' | 'lg'
   className?: string
   disabled?: boolean
+  type?: 'button' | 'submit' | 'reset'
 }) => {
   const baseClasses = 'font-medium rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2'
   
@@ -64,6 +66,7 @@ export const Button = ({
   
   return (
     <button
+      type={type}
       onClick={onClick}
       disabled={disabled}
       className={`${baseClasses} ${variantClasses[variant]} ${sizeClasses[size]} ${disabledClasses} ${className}`}

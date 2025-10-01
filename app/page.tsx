@@ -6,6 +6,7 @@ import { useState, useEffect } from 'react'
 import { useConnection, initializeAccount, incrementCounter, decrementCounter, getAccountData } from '@/lib/solana-dev'
 import { createUserWithWallet, getUserByWallet, createCounter, updateCounter, getCounterByUser, createTransaction } from '@/lib/supabase'
 import { ResponsiveContainer, Card, Button } from '@/components/ResponsiveContainer'
+import { UserRegistration } from '@/components/UserRegistration'
 
 const Home = () => {
   const { publicKey, connected } = useWallet()
@@ -14,6 +15,8 @@ const Home = () => {
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
   const [isInitialized, setIsInitialized] = useState(false)
+  const [showRegistration, setShowRegistration] = useState(false)
+  const [userProfile, setUserProfile] = useState<any>(null)
 
   // Load account data when wallet connects
   useEffect(() => {
@@ -33,29 +36,23 @@ const Home = () => {
       const userResult = await getUserByWallet(walletAddress)
       
       if (!userResult.success || !userResult.data) {
-        // Create new user
-        console.log('Creating new user in database...')
-        const createResult = await createUserWithWallet(walletAddress)
-        
-        if (createResult.success) {
-          console.log('User created successfully:', createResult.data)
-          
-          // Create counter for new user
-          const counterResult = await createCounter(createResult.data.id, 0)
-          if (counterResult.success) {
-            console.log('Counter created successfully:', counterResult.data)
-          }
-        } else {
-          console.error('Error creating user:', createResult.error)
-        }
+        // User doesn't exist, show registration form
+        console.log('User not found, showing registration form...')
+        setShowRegistration(true)
       } else {
         console.log('User already exists:', userResult.data)
+        setUserProfile(userResult.data)
         
-        // Load existing counter
-        const counterResult = await getCounterByUser(userResult.data.id)
-        if (counterResult.success && counterResult.data) {
-          setCount(counterResult.data.current_count)
-          setIsInitialized(true)
+        // Check if user has completed profile (has username/email)
+        if (!userResult.data.username || !userResult.data.email) {
+          setShowRegistration(true)
+        } else {
+          // Load existing counter
+          const counterResult = await getCounterByUser(userResult.data.id)
+          if (counterResult.success && counterResult.data) {
+            setCount(counterResult.data.current_count)
+            setIsInitialized(true)
+          }
         }
       }
     } catch (error) {
@@ -94,6 +91,14 @@ const Home = () => {
       }
     } catch (error) {
       console.error('Error saving counter to database:', error)
+    }
+  }
+
+  const handleRegistrationComplete = async () => {
+    setShowRegistration(false)
+    // Reload user data
+    if (publicKey) {
+      await setupUserInDatabase()
     }
   }
 
@@ -238,8 +243,30 @@ const Home = () => {
               )}
             </Card>
 
+            {/* User Registration */}
+            {connected && showRegistration && (
+              <Card>
+                <UserRegistration 
+                  walletAddress={publicKey?.toBase58() || ''} 
+                  onComplete={handleRegistrationComplete}
+                />
+              </Card>
+            )}
+
+            {/* User Profile */}
+            {connected && !showRegistration && userProfile && (
+              <Card className="bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800">
+                <h3 className="text-lg font-semibold text-green-800 dark:text-green-200 mb-2">
+                  Welcome, {userProfile.username || userProfile.first_name || 'User'}!
+                </h3>
+                <p className="text-sm text-green-700 dark:text-green-300">
+                  Email: {userProfile.email}
+                </p>
+              </Card>
+            )}
+
             {/* Blockchain Counter */}
-            {connected && (
+            {connected && !showRegistration && (
               <Card>
                 <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
                   Blockchain Counter
