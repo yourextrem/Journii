@@ -1,18 +1,8 @@
 {
-  "buildCommand": "npm run build",
-  "outputDirectory": ".next",
   "framework": "nextjs",
-  "installCommand": "npm install",
+  "buildCommand": "npm run build",
   "devCommand": "npm run dev",
-  "env": {
-    "NEXT_PUBLIC_SOLANA_NETWORK": "devnet",
-    "NEXT_PUBLIC_SOLANA_RPC_URL": "https://api.devnet.solana.com"
-  },
-  "functions": {
-    "app/api/**/*.ts": {
-      "runtime": "nodejs18.x"
-    }
-  },
+  "installCommand": "npm install",
   "headers": [
     {
       "source": "/(.*)",
