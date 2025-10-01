@@ -24,7 +24,7 @@ const Home = () => {
       loadAccountData()
       setupUserInDatabase()
     }
-  }, [connected, program, publicKey])
+  }, [connected, program, publicKey]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const setupUserInDatabase = async () => {
     if (!publicKey) return
@@ -35,11 +35,7 @@ const Home = () => {
       // Check if user exists
       const userResult = await getUserByWallet(walletAddress)
       
-      if (!userResult.success || !userResult.data) {
-        // User doesn't exist, show registration form
-        console.log('User not found, showing registration form...')
-        setShowRegistration(true)
-      } else {
+      if (userResult.success && userResult.data) {
         console.log('User already exists:', userResult.data)
         setUserProfile(userResult.data)
         
@@ -54,9 +50,15 @@ const Home = () => {
             setIsInitialized(true)
           }
         }
+      } else {
+        // User doesn't exist, show registration form
+        console.log('User not found, showing registration form...')
+        setShowRegistration(true)
       }
     } catch (error) {
       console.error('Error setting up user in database:', error)
+      // Show registration form on error
+      setShowRegistration(true)
     }
   }
 

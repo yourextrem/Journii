@@ -136,9 +136,9 @@ export const getUserByWallet = async (walletAddress: string) => {
       .from('users')
       .select('*')
       .eq('wallet_address', walletAddress)
-      .single()
+      .maybeSingle()
 
-    if (error && error.code !== 'PGRST116') throw error
+    if (error) throw error
     return { success: true, data: data || null }
   } catch (error) {
     console.error('Error fetching user:', error)

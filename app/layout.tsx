@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import { WalletContextProvider } from '@/components/WalletProvider'
+import { ErrorBoundary } from '@/components/ErrorBoundary'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -19,9 +20,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <WalletContextProvider>
-          {children}
-        </WalletContextProvider>
+        <ErrorBoundary>
+          <WalletContextProvider>
+            {children}
+          </WalletContextProvider>
+        </ErrorBoundary>
       </body>
     </html>
   )
