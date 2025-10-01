@@ -41,13 +41,22 @@ const Home = () => {
         
         // Check if user has completed profile (has username/email)
         if (!userResult.data.username || !userResult.data.email) {
+          console.log('User profile incomplete, showing registration form')
           setShowRegistration(true)
         } else {
+          console.log('User profile complete, loading counter')
           // Load existing counter
           const counterResult = await getCounterByUser(userResult.data.id)
           if (counterResult.success && counterResult.data) {
             setCount(counterResult.data.current_count)
             setIsInitialized(true)
+          } else {
+            // Create counter if it doesn't exist
+            const createCounterResult = await createCounter(userResult.data.id, 0)
+            if (createCounterResult.success) {
+              setCount(0)
+              setIsInitialized(true)
+            }
           }
         }
       } else {
@@ -108,13 +117,19 @@ const Home = () => {
     if (!program || !publicKey) return
     
     setLoading(true)
-    const result = await getAccountData(program, publicKey)
-    
-    if (result.success && result.data) {
-      setCount(result.data.count.toNumber())
-      setIsInitialized(true)
-      setMessage('Account loaded successfully!')
-    } else {
+    try {
+      const result = await getAccountData(program, publicKey)
+      
+      if (result.success && result.data) {
+        setCount(result.data.count.toNumber())
+        setIsInitialized(true)
+        setMessage('Account loaded successfully!')
+      } else {
+        setIsInitialized(false)
+        setMessage('Account not initialized yet.')
+      }
+    } catch (error) {
+      console.log('Account not found (this is normal for new users)')
       setIsInitialized(false)
       setMessage('Account not initialized yet.')
     }

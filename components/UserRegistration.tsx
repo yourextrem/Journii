@@ -31,21 +31,45 @@ export const UserRegistration = ({ walletAddress, onComplete }: UserRegistration
     setMessage('')
 
     try {
-      // Create user with wallet and additional info
-      const result = await createUserWithWallet(
-        walletAddress,
-        formData.username,
-        formData.email,
-        formData.password, // In production, this should be hashed
-        formData.firstName,
-        formData.lastName
-      )
-
-      if (result.success) {
-        setMessage('Account created successfully!')
-        onComplete()
+      // First check if user already exists
+      const { getUserByWallet, updateUser, createCounter } = await import('@/lib/supabase')
+      const existingUser = await getUserByWallet(walletAddress)
+      
+      if (existingUser.success && existingUser.data) {
+        // User exists, update their profile
+        console.log('User exists, updating profile...')
+        const updateResult = await updateUser(existingUser.data.id, {
+          username: formData.username,
+          email: formData.email,
+          password_hash: formData.password, // In production, this should be hashed
+          first_name: formData.firstName,
+          last_name: formData.lastName
+        })
+        
+        if (updateResult.success) {
+          setMessage('Profile updated successfully!')
+          onComplete()
+        } else {
+          setMessage(`Error updating profile: ${updateResult.error}`)
+        }
       } else {
-        setMessage(`Error: ${result.error}`)
+        // Create new user
+        console.log('Creating new user...')
+        const result = await createUserWithWallet(
+          walletAddress,
+          formData.username,
+          formData.email,
+          formData.password, // In production, this should be hashed
+          formData.firstName,
+          formData.lastName
+        )
+
+        if (result.success) {
+          setMessage('Account created successfully!')
+          onComplete()
+        } else {
+          setMessage(`Error: ${result.error}`)
+        }
       }
     } catch (error) {
       setMessage(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`)
