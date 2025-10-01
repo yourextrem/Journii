@@ -4,7 +4,7 @@ import { useWallet } from '@solana/wallet-adapter-react'
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui'
 import { useState, useEffect } from 'react'
 import { useConnection, initializeAccount, incrementCounter, decrementCounter, getAccountData } from '@/lib/solana-dev'
-import { createUserWithWallet, getUserByWallet, createCounter, updateCounter, getCounterByUser, createTransaction } from '@/lib/supabase'
+import { createUser, getUserByWallet, createCounter, updateCounter, getCounterByUser } from '@/lib/supabase-simple'
 import { ResponsiveContainer, Card, Button } from '@/components/ResponsiveContainer'
 import { UserRegistration } from '@/components/UserRegistration'
 
@@ -88,17 +88,6 @@ const Home = () => {
       const counterResult = await updateCounter(userResult.data.id, newCount)
       if (counterResult.success) {
         console.log('Counter updated in database:', counterResult.data)
-      }
-
-      // Record transaction
-      const transactionResult = await createTransaction(
-        userResult.data.id,
-        `mock_signature_${action}_${Date.now()}`,
-        1,
-        action
-      )
-      if (transactionResult.success) {
-        console.log('Transaction recorded:', transactionResult.data)
       }
     } catch (error) {
       console.error('Error saving counter to database:', error)

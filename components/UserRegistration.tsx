@@ -32,7 +32,7 @@ export const UserRegistration = ({ walletAddress, onComplete }: UserRegistration
 
     try {
       // First check if user already exists
-      const { getUserByWallet, updateUser, createCounter } = await import('@/lib/supabase')
+      const { getUserByWallet, updateUser, createCounter, createUser } = await import('@/lib/supabase-simple')
       const existingUser = await getUserByWallet(walletAddress)
       
       if (existingUser.success && existingUser.data) {
@@ -55,7 +55,7 @@ export const UserRegistration = ({ walletAddress, onComplete }: UserRegistration
       } else {
         // Create new user
         console.log('Creating new user...')
-        const result = await createUserWithWallet(
+        const result = await createUser(
           walletAddress,
           formData.username,
           formData.email,
