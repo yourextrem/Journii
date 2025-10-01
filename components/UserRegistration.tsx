@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { createUserWithWallet, updateUser } from '@/lib/supabase'
 import { Card, Button } from './ResponsiveContainer'
+import { hashPassword } from '@/lib/password-utils'
 
 interface UserRegistrationProps {
   walletAddress: string
@@ -31,6 +32,9 @@ export const UserRegistration = ({ walletAddress, onComplete }: UserRegistration
     setMessage('')
 
     try {
+      // Hash the password for security
+      const hashedPassword = await hashPassword(formData.password)
+      
       // First check if user already exists
       const { getUserByWallet, updateUser, createCounter, createUser } = await import('@/lib/supabase-simple')
       const existingUser = await getUserByWallet(walletAddress)
@@ -41,7 +45,7 @@ export const UserRegistration = ({ walletAddress, onComplete }: UserRegistration
         const updateResult = await updateUser(existingUser.data.id, {
           username: formData.username,
           email: formData.email,
-          password_hash: formData.password, // In production, this should be hashed
+          password_hash: hashedPassword, // Now properly hashed
           first_name: formData.firstName,
           last_name: formData.lastName
         })
@@ -59,7 +63,7 @@ export const UserRegistration = ({ walletAddress, onComplete }: UserRegistration
           walletAddress,
           formData.username,
           formData.email,
-          formData.password, // In production, this should be hashed
+          hashedPassword, // Now properly hashed
           formData.firstName,
           formData.lastName
         )
