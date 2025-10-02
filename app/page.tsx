@@ -268,11 +268,28 @@ const HomeContent = () => {
               </Card>
             )}
 
+            {/* Development Mode Indicator */}
+            {process.env.NODE_ENV === 'development' && connected && !showRegistration && (
+              <Card className="bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800">
+                <div className="flex items-center space-x-2">
+                  <div className="text-2xl">🔧</div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-yellow-800 dark:text-yellow-200">
+                      Development Mode
+                    </h3>
+                    <p className="text-sm text-yellow-700 dark:text-yellow-300">
+                      Using mock blockchain operations - transactions are free and instant!
+                    </p>
+                  </div>
+                </div>
+              </Card>
+            )}
+
             {/* Blockchain Counter */}
             {connected && !showRegistration && (
               <Card>
                 <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-                  Blockchain Counter
+                  {process.env.NODE_ENV === 'development' ? 'Mock Counter' : 'Blockchain Counter'}
                 </h3>
                 <div className="text-center">
                   <div className="text-6xl font-bold text-blue-600 dark:text-blue-400 mb-6">

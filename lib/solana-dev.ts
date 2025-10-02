@@ -139,13 +139,22 @@ export const getBaseAccountPDA = (userPublicKey: PublicKey) => {
   )
 }
 
+// Import mock functions for development
+import { 
+  mockInitializeAccount, 
+  mockIncrementCounter, 
+  mockDecrementCounter, 
+  mockGetAccountData,
+  isDevelopmentMode
+} from './mock-blockchain'
+
 // Mock functions for development (when program is not deployed)
-export const initializeAccount = async (program: Program, userPublicKey: PublicKey) => {
+export const initializeAccount = async (program: Program | null, userPublicKey: PublicKey) => {
   try {
-    // Check if we're in development mode
-    if (process.env.NODE_ENV === 'development' && !program) {
-      console.log('Development mode: Mocking account initialization')
-      return { success: true, signature: 'mock-signature', account: userPublicKey }
+    // Use mock functions in development mode when program is not available
+    if (isDevelopmentMode() && !program) {
+      console.log('🔧 [DEV MODE] Using mock blockchain operations')
+      return await mockInitializeAccount(userPublicKey)
     }
 
     const [baseAccountPDA] = getBaseAccountPDA(userPublicKey)
@@ -166,12 +175,11 @@ export const initializeAccount = async (program: Program, userPublicKey: PublicK
   }
 }
 
-export const incrementCounter = async (program: Program, userPublicKey: PublicKey) => {
+export const incrementCounter = async (program: Program | null, userPublicKey: PublicKey) => {
   try {
-    // Check if we're in development mode
-    if (process.env.NODE_ENV === 'development' && !program) {
-      console.log('Development mode: Mocking counter increment')
-      return { success: true, signature: 'mock-increment-signature' }
+    // Use mock functions in development mode when program is not available
+    if (isDevelopmentMode() && !program) {
+      return await mockIncrementCounter(userPublicKey)
     }
 
     const [baseAccountPDA] = getBaseAccountPDA(userPublicKey)
@@ -190,12 +198,11 @@ export const incrementCounter = async (program: Program, userPublicKey: PublicKe
   }
 }
 
-export const decrementCounter = async (program: Program, userPublicKey: PublicKey) => {
+export const decrementCounter = async (program: Program | null, userPublicKey: PublicKey) => {
   try {
-    // Check if we're in development mode
-    if (process.env.NODE_ENV === 'development' && !program) {
-      console.log('Development mode: Mocking counter decrement')
-      return { success: true, signature: 'mock-decrement-signature' }
+    // Use mock functions in development mode when program is not available
+    if (isDevelopmentMode() && !program) {
+      return await mockDecrementCounter(userPublicKey)
     }
 
     const [baseAccountPDA] = getBaseAccountPDA(userPublicKey)
@@ -214,18 +221,22 @@ export const decrementCounter = async (program: Program, userPublicKey: PublicKe
   }
 }
 
-export const getAccountData = async (program: Program, userPublicKey: PublicKey) => {
+export const getAccountData = async (program: Program | null, userPublicKey: PublicKey) => {
   try {
-    // Check if we're in development mode
-    if (process.env.NODE_ENV === 'development' && !program) {
-      console.log('Development mode: Mocking account data fetch')
-      return { 
-        success: true, 
-        data: { 
-          count: new BN(0), 
-          authority: userPublicKey 
-        } 
+    // Use mock functions in development mode when program is not available
+    if (isDevelopmentMode() && !program) {
+      const result = await mockGetAccountData(userPublicKey)
+      if (result.success && result.data) {
+        // Convert to BN format for compatibility
+        return {
+          success: true,
+          data: {
+            count: new BN(result.data.count),
+            authority: userPublicKey
+          }
+        }
       }
+      return result
     }
 
     const [baseAccountPDA] = getBaseAccountPDA(userPublicKey)
