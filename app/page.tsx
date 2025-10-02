@@ -8,7 +8,7 @@ import { createUser, getUserByWallet, createCounter, updateCounter, getCounterBy
 import { ResponsiveContainer, Card, Button } from '@/components/ResponsiveContainer'
 import { UserRegistration } from '@/components/UserRegistration'
 
-const Home = () => {
+const HomeContent = () => {
   const { publicKey, connected } = useWallet()
   const { program } = useConnection()
   const [count, setCount] = useState(0)
@@ -371,6 +371,10 @@ const Home = () => {
       </footer>
     </div>
   )
+}
+
+const Home = () => {
+  return <HomeContent />
 }
 
 export default Home

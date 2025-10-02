@@ -6,6 +6,7 @@ import { WalletAdapterNetwork } from '@solana/wallet-adapter-base'
 import { PhantomWalletAdapter } from '@solana/wallet-adapter-phantom'
 import { WalletModalProvider } from '@solana/wallet-adapter-react-ui'
 import { clusterApiUrl } from '@solana/web3.js'
+import dynamic from 'next/dynamic'
 
 // Import wallet adapter CSS
 require('@solana/wallet-adapter-react-ui/styles.css')
@@ -14,9 +15,8 @@ interface WalletContextProviderProps {
   children: ReactNode
 }
 
-export const WalletContextProvider: FC<WalletContextProviderProps> = ({ children }) => {
-  const [mounted, setMounted] = useState(false)
-
+// Create a component that only renders on client side
+const ClientWalletProvider: FC<WalletContextProviderProps> = ({ children }) => {
   // The network can be set to 'devnet', 'testnet', or 'mainnet-beta'
   const network = WalletAdapterNetwork.Devnet
 
@@ -30,15 +30,6 @@ export const WalletContextProvider: FC<WalletContextProviderProps> = ({ children
     []
   )
 
-  useEffect(() => {
-    setMounted(true)
-  }, [])
-
-  // Prevent hydration mismatch by not rendering wallet components on server
-  if (!mounted) {
-    return <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">{children}</div>
-  }
-
   return (
     <ConnectionProvider endpoint={endpoint}>
       <WalletProvider wallets={wallets} autoConnect={false}>
@@ -48,4 +39,24 @@ export const WalletContextProvider: FC<WalletContextProviderProps> = ({ children
       </WalletProvider>
     </ConnectionProvider>
   )
+}
+
+// Dynamically import the wallet provider to prevent SSR issues
+const DynamicWalletProvider = dynamic(
+  () => Promise.resolve(ClientWalletProvider),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600 dark:text-gray-300">Loading wallet...</p>
+        </div>
+      </div>
+    )
+  }
+)
+
+export const WalletContextProvider: FC<WalletContextProviderProps> = ({ children }) => {
+  return <DynamicWalletProvider>{children}</DynamicWalletProvider>
 }
