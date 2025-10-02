@@ -67,6 +67,7 @@ export const UserRegistration = ({ walletAddress, onComplete }: UserRegistration
         }
       }
     } catch (error) {
+      console.error('Registration error:', error)
       setMessage(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`)
     }
 

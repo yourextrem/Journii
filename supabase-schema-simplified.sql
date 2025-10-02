@@ -27,29 +27,10 @@ CREATE INDEX IF NOT EXISTS idx_users_wallet_address ON users(wallet_address);
 CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
 CREATE INDEX IF NOT EXISTS idx_counters_user_id ON counters(user_id);
 
--- Enable Row Level Security (RLS)
-ALTER TABLE users ENABLE ROW LEVEL SECURITY;
-ALTER TABLE counters ENABLE ROW LEVEL SECURITY;
-
--- Create policies for users table
-CREATE POLICY "Users can view their own data" ON users
-    FOR SELECT USING (auth.uid()::text = id::text);
-
-CREATE POLICY "Users can insert their own data" ON users
-    FOR INSERT WITH CHECK (true);
-
-CREATE POLICY "Users can update their own data" ON users
-    FOR UPDATE USING (auth.uid()::text = id::text);
-
--- Create policies for counters table
-CREATE POLICY "Users can view their own counters" ON counters
-    FOR SELECT USING (auth.uid()::text = user_id::text);
-
-CREATE POLICY "Users can insert their own counters" ON counters
-    FOR INSERT WITH CHECK (auth.uid()::text = user_id::text);
-
-CREATE POLICY "Users can update their own counters" ON counters
-    FOR UPDATE USING (auth.uid()::text = user_id::text);
+-- Disable Row Level Security for wallet-based authentication
+-- Since we're using wallet addresses instead of Supabase auth
+ALTER TABLE users DISABLE ROW LEVEL SECURITY;
+ALTER TABLE counters DISABLE ROW LEVEL SECURITY;
 
 -- Create function to update updated_at timestamp
 CREATE OR REPLACE FUNCTION update_updated_at_column()
