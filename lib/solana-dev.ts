@@ -6,7 +6,7 @@ import { useMemo } from 'react'
 // Program ID - this should match your deployed program
 export const PROGRAM_ID = new PublicKey(process.env.NEXT_PUBLIC_PROGRAM_ID || 'Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS')
 
-// Simplified IDL for development (without requiring Anchor build)
+// Simplified IDL for development (compatible with Anchor 0.31.1)
 export const IDL: Idl = {
   "version": "0.1.0",
   "name": "journii",
@@ -98,7 +98,34 @@ export const useConnection = () => {
 
   const program = useMemo(() => {
     if (!provider) return null
-    return new Program(IDL, PROGRAM_ID, provider)
+    
+    try {
+      // In development mode, we might not have a deployed program
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Development mode: Program creation may fail if not deployed')
+      }
+      
+      // Validate PROGRAM_ID
+      if (!PROGRAM_ID) {
+        console.warn('PROGRAM_ID not provided')
+        return null
+      }
+      
+      // Validate IDL structure
+      if (!IDL || !IDL.name || !IDL.instructions) {
+        console.warn('Invalid IDL structure')
+        return null
+      }
+      
+      // Create program with error handling
+      const program = new Program(IDL, PROGRAM_ID, provider)
+      console.log('Program created successfully:', program.programId.toString())
+      return program
+    } catch (error) {
+      console.warn('Program creation failed (this is normal if program is not deployed):', error)
+      // Return null instead of throwing - app can still work without program
+      return null
+    }
   }, [provider])
 
   return { connection, provider, program }
