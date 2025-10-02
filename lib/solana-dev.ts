@@ -118,11 +118,26 @@ export const useConnection = () => {
       }
       
       // Create program with error handling
+      if (!provider) {
+        console.warn('Provider not available')
+        return null
+      }
+      
+      // Additional validation before creating program
+      if (!provider.connection || !provider.wallet) {
+        console.warn('Provider connection or wallet not ready')
+        return null
+      }
+      
       const program = new Program(IDL, PROGRAM_ID, provider)
       console.log('Program created successfully:', program.programId.toString())
       return program
     } catch (error) {
-      console.warn('Program creation failed (this is normal if program is not deployed):', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.log('ℹ️ Solana program not available (deploy program for blockchain features)')
+      } else {
+        console.warn('Program creation failed:', error)
+      }
       // Return null instead of throwing - app can still work without program
       return null
     }

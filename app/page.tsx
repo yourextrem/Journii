@@ -185,9 +185,25 @@ const HomeContent = () => {
       <header className="bg-white dark:bg-gray-800 shadow-sm">
         <ResponsiveContainer>
           <div className="flex justify-between items-center py-4">
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-              Journii
-            </h1>
+            <div className="flex items-center space-x-6">
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+                Journii
+              </h1>
+              <nav className="hidden md:flex space-x-4">
+                <a 
+                  href="/" 
+                  className="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                >
+                  Home
+                </a>
+                <a 
+                  href="/commission" 
+                  className="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                >
+                  Commission
+                </a>
+              </nav>
+            </div>
             <WalletMultiButton />
           </div>
         </ResponsiveContainer>
@@ -327,6 +343,23 @@ const HomeContent = () => {
                       >
                         {loading ? 'Loading...' : 'Refresh'}
                       </Button>
+                      {process.env.NODE_ENV === 'development' && (
+                        <Button
+                          onClick={async () => {
+                            if (publicKey) {
+                              const { mockResetAccount } = await import('@/lib/mock-blockchain')
+                              await mockResetAccount(publicKey)
+                              setCount(0)
+                              setAccountInitialized(false)
+                              console.log('🔧 [DEV MODE] Account reset for testing')
+                            }
+                          }}
+                          variant="secondary"
+                          className="bg-gray-500 hover:bg-gray-600 text-white"
+                        >
+                          🔄 Reset (Dev)
+                        </Button>
+                      )}
                     </div>
                   )}
                 </div>

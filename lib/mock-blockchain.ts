@@ -204,3 +204,5 @@ export const getMockAccounts = () => {
 export const isDevelopmentMode = (): boolean => {
   return process.env.NODE_ENV === 'development'
 }
+
+// mockResetAccount is already exported above
