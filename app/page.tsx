@@ -4,7 +4,7 @@ import { useWallet } from '@solana/wallet-adapter-react'
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui'
 import { useState, useEffect } from 'react'
 import { useConnection, initializeAccount, incrementCounter, decrementCounter, getAccountData } from '@/lib/solana-dev'
-import { createUser, getUserByWallet, createCounter, updateCounter, getCounterByUser } from '@/lib/supabase-simple'
+import { createUser, getUserByWallet, createCounter, updateCounter, getCounterByUser } from '@/lib/supabase-secure'
 import { ResponsiveContainer, Card, Button } from '@/components/ResponsiveContainer'
 import { UserRegistration } from '@/components/UserRegistration'
 

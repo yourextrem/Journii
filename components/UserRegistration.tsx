@@ -33,7 +33,7 @@ export const UserRegistration = ({ walletAddress, onComplete }: UserRegistration
       const hashedPassword = await hashPassword(formData.password)
       
       // First check if user already exists
-      const { getUserByWallet, updateUser, createCounter, createUser } = await import('@/lib/supabase-simple')
+      const { getUserByWallet, updateUser, createCounter, createUser } = await import('@/lib/supabase-secure')
       const existingUser = await getUserByWallet(walletAddress)
       
       if (existingUser.success && existingUser.data) {
