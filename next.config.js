@@ -1,7 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  swcMinify: true,
   experimental: {
     // Enable modern features for better performance
     optimizePackageImports: ['@solana/web3.js', '@coral-xyz/anchor'],
@@ -43,6 +42,7 @@ const nextConfig = {
   output: 'standalone',
   poweredByHeader: false,
   compress: true,
+  outputFileTracingRoot: __dirname,
 }
 
 module.exports = nextConfig

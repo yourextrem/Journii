@@ -350,7 +350,7 @@ const HomeContent = () => {
                               const { mockResetAccount } = await import('@/lib/mock-blockchain')
                               await mockResetAccount(publicKey)
                               setCount(0)
-                              setAccountInitialized(false)
+                              setIsInitialized(false)
                               console.log('🔧 [DEV MODE] Account reset for testing')
                             }
                           }}

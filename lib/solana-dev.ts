@@ -6,80 +6,12 @@ import { useMemo } from 'react'
 // Program ID - this should match your deployed program
 export const PROGRAM_ID = new PublicKey(process.env.NEXT_PUBLIC_PROGRAM_ID || 'Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS')
 
-// Simplified IDL for development (compatible with Anchor 0.31.1)
-export const IDL: Idl = {
-  "version": "0.1.0",
-  "name": "journii",
-  "instructions": [
-    {
-      "name": "initialize",
-      "accounts": [
-        {
-          "name": "baseAccount",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "user",
-          "isMut": true,
-          "isSigner": true
-        },
-        {
-          "name": "systemProgram",
-          "isMut": false,
-          "isSigner": false
-        }
-      ],
-      "args": []
-    },
-    {
-      "name": "increment",
-      "accounts": [
-        {
-          "name": "baseAccount",
-          "isMut": true,
-          "isSigner": false
-        }
-      ],
-      "args": []
-    },
-    {
-      "name": "decrement",
-      "accounts": [
-        {
-          "name": "baseAccount",
-          "isMut": true,
-          "isSigner": false
-        }
-      ],
-      "args": []
-    }
-  ],
-  "accounts": [
-    {
-      "name": "BaseAccount",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "count",
-            "type": "u64"
-          },
-          {
-            "name": "authority",
-            "type": "publicKey"
-          }
-        ]
-      }
-    }
-  ],
-  "errors": [
-    {
-      "code": 6000,
-      "name": "Underflow",
-      "msg": "Underflow error"
-    }
-  ]
+// Minimal IDL for development - will use mock functions instead
+export const IDL: any = {
+  name: "journii",
+  instructions: [],
+  accounts: [],
+  errors: []
 }
 
 export const useConnection = () => {
@@ -129,7 +61,7 @@ export const useConnection = () => {
         return null
       }
       
-      const program = new Program(IDL, PROGRAM_ID, provider)
+      const program = new Program(IDL, provider)
       console.log('Program created successfully:', program.programId.toString())
       return program
     } catch (error) {
@@ -172,6 +104,10 @@ export const initializeAccount = async (program: Program | null, userPublicKey: 
       return await mockInitializeAccount(userPublicKey)
     }
 
+    if (!program) {
+      return { success: false, error: 'Program not available' }
+    }
+
     const [baseAccountPDA] = getBaseAccountPDA(userPublicKey)
     
     const tx = await program.methods
@@ -197,6 +133,10 @@ export const incrementCounter = async (program: Program | null, userPublicKey: P
       return await mockIncrementCounter(userPublicKey)
     }
 
+    if (!program) {
+      return { success: false, error: 'Program not available' }
+    }
+
     const [baseAccountPDA] = getBaseAccountPDA(userPublicKey)
     
     const tx = await program.methods
@@ -218,6 +158,10 @@ export const decrementCounter = async (program: Program | null, userPublicKey: P
     // Use mock functions in development mode when program is not available
     if (isDevelopmentMode() && !program) {
       return await mockDecrementCounter(userPublicKey)
+    }
+
+    if (!program) {
+      return { success: false, error: 'Program not available' }
     }
 
     const [baseAccountPDA] = getBaseAccountPDA(userPublicKey)
@@ -254,10 +198,8 @@ export const getAccountData = async (program: Program | null, userPublicKey: Pub
       return result
     }
 
-    const [baseAccountPDA] = getBaseAccountPDA(userPublicKey)
-    
-    const account = await program.account.baseAccount.fetch(baseAccountPDA)
-    return { success: true, data: account }
+    // For now, return mock data since we don't have a real program deployed
+    return { success: false, error: 'Account not found - program not deployed' }
   } catch (error) {
     console.error('Error fetching account data:', error)
     return { success: false, error: error instanceof Error ? error.message : 'Unknown error' }
