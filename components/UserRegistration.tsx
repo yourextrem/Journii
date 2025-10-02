@@ -29,11 +29,8 @@ export const UserRegistration = ({ walletAddress, onComplete }: UserRegistration
     setMessage('')
 
     try {
-      // Hash the password for security
-      const hashedPassword = await hashPassword(formData.password)
-      
       // First check if user already exists
-      const { getUserByWallet, updateUser, createCounter, createUser } = await import('@/lib/supabase-secure')
+      const { getUserByWallet, updateUser, createCounter, createUser } = await import('@/lib/api-client')
       const existingUser = await getUserByWallet(walletAddress)
       
       if (existingUser.success && existingUser.data) {
@@ -41,7 +38,7 @@ export const UserRegistration = ({ walletAddress, onComplete }: UserRegistration
         console.log('User exists, updating profile...')
         const updateResult = await updateUser(existingUser.data.id, {
           username: formData.username,
-          password_hash: hashedPassword
+          password: formData.password // API will hash this
         })
         
         if (updateResult.success) {
@@ -56,7 +53,7 @@ export const UserRegistration = ({ walletAddress, onComplete }: UserRegistration
         const result = await createUser(
           walletAddress,
           formData.username,
-          hashedPassword
+          formData.password // API will hash this
         )
 
         if (result.success) {
