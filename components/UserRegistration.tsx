@@ -13,17 +13,14 @@ interface UserRegistrationProps {
 export const UserRegistration = ({ walletAddress, onComplete }: UserRegistrationProps) => {
   const [formData, setFormData] = useState({
     username: '',
-    email: '',
-    password: '',
-    firstName: '',
-    lastName: ''
+    password: ''
   })
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!formData.username || !formData.email || !formData.password) {
+    if (!formData.username || !formData.password) {
       setMessage('Please fill in all required fields')
       return
     }
@@ -44,10 +41,7 @@ export const UserRegistration = ({ walletAddress, onComplete }: UserRegistration
         console.log('User exists, updating profile...')
         const updateResult = await updateUser(existingUser.data.id, {
           username: formData.username,
-          email: formData.email,
-          password_hash: hashedPassword, // Now properly hashed
-          first_name: formData.firstName,
-          last_name: formData.lastName
+          password_hash: hashedPassword
         })
         
         if (updateResult.success) {
@@ -62,10 +56,7 @@ export const UserRegistration = ({ walletAddress, onComplete }: UserRegistration
         const result = await createUser(
           walletAddress,
           formData.username,
-          formData.email,
-          hashedPassword, // Now properly hashed
-          formData.firstName,
-          formData.lastName
+          hashedPassword
         )
 
         if (result.success) {
@@ -113,22 +104,6 @@ export const UserRegistration = ({ walletAddress, onComplete }: UserRegistration
         </div>
 
         <div>
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Email *
-          </label>
-          <input
-            type="email"
-            id="email"
-            name="email"
-            value={formData.email}
-            onChange={handleInputChange}
-            required
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-            placeholder="your@email.com"
-          />
-        </div>
-
-        <div>
           <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
             Password *
           </label>
@@ -141,36 +116,6 @@ export const UserRegistration = ({ walletAddress, onComplete }: UserRegistration
             required
             className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
             placeholder="Create a password"
-          />
-        </div>
-
-        <div>
-          <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            First Name
-          </label>
-          <input
-            type="text"
-            id="firstName"
-            name="firstName"
-            value={formData.firstName}
-            onChange={handleInputChange}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-            placeholder="Your first name"
-          />
-        </div>
-
-        <div>
-          <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Last Name
-          </label>
-          <input
-            type="text"
-            id="lastName"
-            name="lastName"
-            value={formData.lastName}
-            onChange={handleInputChange}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-            placeholder="Your last name"
           />
         </div>
 

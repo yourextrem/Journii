@@ -10,10 +10,7 @@ export interface User {
   id: string
   wallet_address: string
   username?: string
-  email?: string
   password_hash?: string
-  first_name?: string
-  last_name?: string
   created_at: string
   updated_at: string
 }
@@ -28,11 +25,8 @@ export interface Counter {
 // Simple user functions
 export const createUser = async (
   walletAddress: string,
-  username?: string,
-  email?: string,
-  passwordHash?: string,
-  firstName?: string,
-  lastName?: string
+  username: string,
+  passwordHash: string
 ) => {
   try {
     const { data, error } = await supabase
@@ -41,10 +35,7 @@ export const createUser = async (
         {
           wallet_address: walletAddress,
           username,
-          email,
           password_hash: passwordHash,
-          first_name: firstName,
-          last_name: lastName,
         }
       ])
       .select()

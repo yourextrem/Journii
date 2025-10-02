@@ -39,8 +39,8 @@ const Home = () => {
         console.log('User already exists:', userResult.data)
         setUserProfile(userResult.data)
         
-        // Check if user has completed profile (has username/email)
-        if (!userResult.data.username || !userResult.data.email) {
+        // Check if user has completed profile (has username)
+        if (!userResult.data.username) {
           console.log('User profile incomplete, showing registration form')
           setShowRegistration(true)
         } else {
@@ -263,11 +263,8 @@ const Home = () => {
             {connected && !showRegistration && userProfile && (
               <Card className="bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800">
                 <h3 className="text-lg font-semibold text-green-800 dark:text-green-200 mb-2">
-                  Welcome, {userProfile.username || userProfile.first_name || 'User'}!
+                  Welcome, {userProfile.username || 'User'}!
                 </h3>
-                <p className="text-sm text-green-700 dark:text-green-300">
-                  Email: {userProfile.email}
-                </p>
               </Card>
             )}
 
